@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>OPTCG 斬殺計算機 | Lethal Calculator</title>
+
+    <!-- PWA & Mobile Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0e1a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="OPTCG斬殺">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #131929;
+            --bg-tertiary: #1c2440;
+            --bg-card: #182038;
+            --text-primary: #f0f0f5;
+            --text-secondary: #8892b0;
+            --text-muted: #5a6380;
+            --accent-gold: #f0b232;
+            --accent-gold-dark: #c48a1a;
+            --accent-red: #e63946;
+            --accent-green: #2ecc71;
+            --accent-green-dark: #1a9c54;
+            --accent-blue: #4a9eff;
+            --accent-cyan: #00d4ff;
+            --accent-purple: #a56eff;
+            --border-color: #2a3456;
+            --border-highlight: #3d4f7c;
+            --don-color: #e63946;
+            --don-glow: rgba(230, 57, 70, 0.4);
+            --life-color: #e63946;
+            --life-glow: rgba(230, 57, 70, 0.3);
+            --blocker-color: #4a9eff;
+            --blocker-glow: rgba(74, 158, 255, 0.3);
+            --counter-color: #a56eff;
+            --counter-glow: rgba(165, 110, 255, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', 'Microsoft JhengHei', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-top: max(12px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(240, 178, 50, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(74, 158, 255, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(165, 110, 255, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container { max-width: 960px; margin: 0 auto; padding: 20px 16px 40px; position: relative; z-index: 1; }
+
+        /* Header */
+        header { text-align: center; margin-bottom: 24px; }
+        header h1 {
+            font-size: 2rem; font-weight: 800; letter-spacing: 2px;
+            background: linear-gradient(135deg, var(--accent-gold), #ffe066, var(--accent-gold));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        header .subtitle { font-size: 0.85rem; color: var(--text-muted); letter-spacing: 4px; text-transform: uppercase; margin-top: 4px; }
+        .header-actions { display: flex; justify-content: center; margin-top: 10px; }
+
+        /* Battlefield */
+        .battlefield { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+        @media (max-width: 700px) { .battlefield { grid-template-columns: 1fr; } }
+
+        /* Panels */
+        .panel {
+            background: var(--bg-secondary); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 20px; position: relative; overflow: hidden;
+        }
+        .panel::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 16px 16px 0 0; }
+        .my-field::before { background: linear-gradient(90deg, var(--accent-gold), var(--accent-gold-dark)); }
+        .opp-field::before { background: linear-gradient(90deg, var(--accent-blue), #2d6fd4); }
+
+        .panel-title {
+            font-size: 1rem; font-weight: 700; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .my-field .panel-title { color: var(--accent-gold); }
+        .opp-field .panel-title { color: var(--accent-blue); }
+
+        /* Character Rows */
+        .char-row {
+            display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+            margin-bottom: 6px; border-radius: 10px; background: var(--bg-card);
+            border: 1px solid transparent; transition: all 0.2s;
+        }
+        .char-row:hover { border-color: var(--border-highlight); }
+        .char-row.leader-row { border-color: var(--border-highlight); background: linear-gradient(135deg, var(--bg-card), var(--bg-tertiary)); }
+        .char-row .char-icon { font-size: 1.1rem; width: 28px; text-align: center; flex-shrink: 0; }
+        .char-row .char-label { font-size: 0.85rem; color: var(--text-secondary); flex: 1; }
+        .char-row.leader-row .char-label { color: var(--text-primary); font-weight: 600; }
+
+        /* Power Select */
+        .power-select {
+            appearance: none; -webkit-appearance: none;
+            background: var(--bg-primary); color: var(--text-primary);
+            border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 6px 28px 6px 12px; font-size: 0.9rem; font-weight: 600;
+            font-family: inherit; cursor: pointer; outline: none; transition: all 0.2s;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238892b0' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 8px center; min-width: 72px;
+        }
+        .power-select:hover { border-color: var(--border-highlight); }
+        .power-select:focus { border-color: var(--accent-gold); box-shadow: 0 0 0 2px rgba(240, 178, 50, 0.15); }
+        .power-select.is-zero { color: var(--text-muted); }
+
+        /* Resource Sections */
+        .resource-section { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-color); }
+        .resource-label { font-size: 0.85rem; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .resource-count { font-size: 0.8rem; color: var(--text-muted); margin-left: auto; }
+        .dots-container { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .dot {
+            width: 34px; height: 34px; border-radius: 50%;
+            border: 2px solid var(--border-color); background: var(--bg-primary);
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center;
+            justify-content: center; font-size: 0.7rem; font-weight: 700;
+            color: var(--text-muted); user-select: none;
+        }
+        .dot:hover { border-color: var(--border-highlight); transform: scale(1.08); }
+        .dot.don-dot.active { background: var(--don-color); border-color: var(--don-color); color: #fff; box-shadow: 0 0 10px var(--don-glow); }
+        .dot.life-dot.active { background: var(--life-color); border-color: var(--life-color); color: #fff; box-shadow: 0 0 10px var(--life-glow); }
+
+        /* Blocker Toggles */
+        .blocker-row {
+            display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+            margin-bottom: 6px; border-radius: 10px; background: var(--bg-card);
+            border: 1px solid transparent; cursor: pointer; transition: all 0.2s; user-select: none;
+        }
+        .blocker-row:hover { border-color: var(--border-highlight); }
+        .blocker-row.active { border-color: var(--blocker-color); background: linear-gradient(135deg, rgba(74, 158, 255, 0.08), var(--bg-card)); }
+        .blocker-icon { font-size: 1.1rem; width: 28px; text-align: center; flex-shrink: 0; }
+        .blocker-label { font-size: 0.85rem; color: var(--text-muted); flex: 1; transition: color 0.2s; }
+        .blocker-row.active .blocker-label { color: var(--accent-blue); }
+
+        .blocker-toggle {
+            width: 38px; height: 20px; border-radius: 10px; background: var(--bg-primary);
+            border: 1px solid var(--border-color); position: relative; transition: all 0.25s; flex-shrink: 0;
+        }
+        .blocker-toggle::after {
+            content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%;
+            background: var(--text-muted); top: 2px; left: 2px; transition: all 0.25s;
+        }
+        .blocker-row.active .blocker-toggle { background: var(--accent-blue); border-color: var(--accent-blue); }
+        .blocker-row.active .blocker-toggle::after { background: #fff; left: 20px; }
+
+        /* ── Hand Cards (Counter) ── */
+        .hand-cards-container { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .hand-card-slot { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+
+        .hand-card {
+            width: 40px; height: 54px; border-radius: 7px;
+            border: 2px solid var(--border-color); background: var(--bg-primary);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 0.78rem; font-weight: 700;
+            color: var(--text-muted); transition: all 0.2s; user-select: none;
+            position: relative;
+        }
+
+        .hand-card:hover { border-color: var(--border-highlight); transform: translateY(-2px); }
+
+        .hand-card.val-1 {
+            background: rgba(165, 110, 255, 0.12);
+            border-color: rgba(165, 110, 255, 0.45);
+            color: var(--accent-purple);
+        }
+
+        .hand-card.val-2 {
+            background: rgba(165, 110, 255, 0.7);
+            border-color: var(--counter-color);
+            color: #fff;
+            box-shadow: 0 0 8px var(--counter-glow);
+        }
+
+        .hand-card-num { font-size: 0.6rem; color: var(--text-muted); }
+
+        .counter-summary {
+            margin-top: 10px; font-size: 0.78rem; color: var(--text-muted);
+            padding: 6px 10px; background: var(--bg-card); border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        .counter-summary strong { color: var(--text-primary); }
+        .counter-summary .c-purple { color: var(--accent-purple); font-weight: 600; }
+
+        .click-hint {
+            font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;
+            font-style: italic; opacity: 0.7;
+        }
+
+        .counter-quick-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .quick-btn {
+            flex: 1;
+            padding: 4px 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-btn:hover {
+            border-color: var(--accent-purple);
+            color: var(--text-primary);
+        }
+
+        /* ── Result Panel ── */
+        .result-panel {
+            background: var(--bg-secondary); border: 2px solid var(--border-color);
+            border-radius: 16px; padding: 24px; transition: all 0.4s; position: relative; overflow: hidden;
+        }
+        .result-panel.lethal { border-color: var(--accent-green); animation: pulseGlow 2.5s ease-in-out infinite; }
+        .result-panel.not-lethal { border-color: var(--accent-red); box-shadow: 0 0 20px rgba(230, 57, 70, 0.1); }
+        .result-panel.partial { border-color: var(--accent-gold); box-shadow: 0 0 20px rgba(240, 178, 50, 0.1); }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(46, 204, 113, 0.15); }
+            50% { box-shadow: 0 0 40px rgba(46, 204, 113, 0.25), 0 0 80px rgba(46, 204, 113, 0.1); }
+        }
+
+        /* Probability Display */
+        .prob-section { text-align: center; margin-bottom: 20px; }
+        .prob-gauge {
+            width: 140px; height: 140px; border-radius: 50%; margin: 0 auto 12px;
+            display: flex; align-items: center; justify-content: center;
+            position: relative; transition: all 0.5s;
+        }
+        .prob-gauge::before {
+            content: ''; position: absolute; inset: 0; border-radius: 50%;
+            background: conic-gradient(var(--gauge-color, #555) 0% var(--pct, 0%), var(--bg-primary) var(--pct, 0%) 100%);
+            transition: all 0.5s;
+        }
+        .prob-gauge-inner {
+            width: 112px; height: 112px; border-radius: 50%;
+            background: var(--bg-secondary); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; position: relative; z-index: 1;
+        }
+        .prob-value { font-size: 2rem; font-weight: 800; line-height: 1; }
+        .prob-label-small { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+
+        .prob-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+        .prob-subtitle { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; }
+        .prob-subtitle strong { color: var(--text-primary); }
+
+        /* Counter Analysis */
+        .counter-analysis { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color); }
+        .counter-analysis-title {
+            font-size: 0.9rem; font-weight: 700; color: var(--accent-purple);
+            margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+        }
+        .counter-grid { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
+        .counter-cell {
+            width: 42px; padding: 6px 0; border-radius: 8px; text-align: center;
+            font-size: 0.75rem; font-weight: 700; border: 2px solid transparent;
+            transition: all 0.2s; position: relative;
+        }
+        .counter-cell.lethal-cell { background: rgba(46, 204, 113, 0.15); color: var(--accent-green); border-color: rgba(46, 204, 113, 0.3); }
+        .counter-cell.not-lethal-cell { background: rgba(230, 57, 70, 0.1); color: var(--accent-red); border-color: rgba(230, 57, 70, 0.2); }
+        .counter-cell.estimated {
+            box-shadow: 0 0 0 2px var(--accent-purple);
+            transform: scale(1.1); z-index: 1;
+        }
+        .counter-cell .cell-label { font-size: 0.6rem; color: var(--text-muted); display: block; margin-top: 2px; }
+        .counter-cell.estimated .cell-label { color: var(--accent-purple); }
+
+        .threshold-info {
+            font-size: 0.85rem; color: var(--text-secondary);
+            padding: 10px 14px; background: var(--bg-card); border-radius: 10px;
+            border: 1px solid var(--border-color); line-height: 1.6;
+        }
+        .threshold-info strong { color: var(--text-primary); }
+        .threshold-info .threshold-num { color: var(--accent-green); font-weight: 700; }
+        .threshold-info .estimate-num { color: var(--accent-purple); font-weight: 700; }
+
+        /* Attack Plan */
+        .attack-plan { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color); }
+        .attack-plan-title { font-size: 0.9rem; font-weight: 700; color: var(--accent-gold); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+        .attack-step {
+            display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+            margin-bottom: 6px; border-radius: 10px; background: var(--bg-card);
+            border: 1px solid var(--border-color); font-size: 0.85rem;
+            animation: slideIn 0.3s ease forwards;
+        }
+        .attack-step:nth-child(2) { animation-delay: 0.05s; }
+        .attack-step:nth-child(3) { animation-delay: 0.1s; }
+        .attack-step:nth-child(4) { animation-delay: 0.15s; }
+        .attack-step:nth-child(5) { animation-delay: 0.2s; }
+        .attack-step:nth-child(6) { animation-delay: 0.25s; }
+        .attack-step:nth-child(7) { animation-delay: 0.3s; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .step-number {
+            width: 26px; height: 26px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 0.75rem;
+            font-weight: 800; flex-shrink: 0;
+        }
+        .attack-step.blocked .step-number { background: rgba(74, 158, 255, 0.2); color: var(--accent-blue); }
+        .attack-step.hit-life .step-number { background: rgba(240, 178, 50, 0.2); color: var(--accent-gold); }
+        .attack-step.lethal-blow .step-number { background: rgba(46, 204, 113, 0.2); color: var(--accent-green); }
+        .attack-step.countered .step-number { background: rgba(165, 110, 255, 0.2); color: var(--accent-purple); }
+
+        .step-attacker { flex: 1; min-width: 0; }
+        .step-attacker .name { font-weight: 600; color: var(--text-primary); }
+        .step-attacker .power-detail { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+        .step-attacker .power-detail .don-boost { color: var(--don-color); font-weight: 600; }
+        .step-result { font-size: 0.8rem; font-weight: 600; text-align: right; flex-shrink: 0; white-space: nowrap; }
+        .attack-step.blocked .step-result { color: var(--accent-blue); }
+        .attack-step.hit-life .step-result { color: var(--accent-gold); }
+        .attack-step.lethal-blow .step-result { color: var(--accent-green); }
+        .attack-step.countered .step-result { color: var(--accent-purple); }
+
+        .don-summary {
+            margin-top: 16px; padding: 12px 14px; border-radius: 10px;
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            font-size: 0.85rem; color: var(--text-secondary);
+            display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+        }
+        .don-summary strong { color: var(--text-primary); }
+        .don-summary .don-used { color: var(--don-color); font-weight: 600; }
+        .don-summary .don-remaining { color: var(--accent-green); font-weight: 600; }
+
+        /* Not Lethal */
+        .progress-bar-container { margin-top: 16px; background: var(--bg-card); border-radius: 8px; padding: 14px; border: 1px solid var(--border-color); }
+        .progress-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+        .progress-bar { height: 8px; background: var(--bg-primary); border-radius: 4px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+        .progress-bar-fill.low { background: var(--accent-red); }
+        .progress-bar-fill.mid { background: var(--accent-gold); }
+        .progress-bar-fill.high { background: var(--accent-green); }
+        .progress-text { font-size: 0.8rem; color: var(--text-secondary); margin-top: 6px; text-align: right; }
+
+        /* Buttons */
+        .reset-btn {
+            display: inline-flex; align-items: center; gap: 6px; background: var(--bg-tertiary);
+            color: var(--text-muted); border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 6px 14px; font-size: 0.8rem; font-family: inherit; cursor: pointer; transition: all 0.2s;
+        }
+        .reset-btn:hover { color: var(--text-primary); border-color: var(--border-highlight); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>⚔️ OPTCG 斬殺計算機</h1>
+        <div class="subtitle">Lethal Calculator</div>
+        <div class="header-actions"><button class="reset-btn" onclick="resetAll()">🔄 重置</button></div>
+    </header>
+
+    <div class="battlefield">
+        <!-- ── My Field ── -->
+        <div class="panel my-field">
+            <div class="panel-title"><span class="icon">🏴‍☠️</span> 我方場面</div>
+            <div class="char-row leader-row">
+                <span class="char-icon">👑</span><span class="char-label">Leader</span>
+                <select class="power-select" id="my-leader" onchange="onPowerChange(this)"></select>
+            </div>
+            <div class="char-row"><span class="char-icon">⚔️</span><span class="char-label">角色 1</span><select class="power-select my-char" data-index="0" onchange="onPowerChange(this)"></select></div>
+            <div class="char-row"><span class="char-icon">⚔️</span><span class="char-label">角色 2</span><select class="power-select my-char" data-index="1" onchange="onPowerChange(this)"></select></div>
+            <div class="char-row"><span class="char-icon">⚔️</span><span class="char-label">角色 3</span><select class="power-select my-char" data-index="2" onchange="onPowerChange(this)"></select></div>
+            <div class="char-row"><span class="char-icon">⚔️</span><span class="char-label">角色 4</span><select class="power-select my-char" data-index="3" onchange="onPowerChange(this)"></select></div>
+            <div class="char-row"><span class="char-icon">⚔️</span><span class="char-label">角色 5</span><select class="power-select my-char" data-index="4" onchange="onPowerChange(this)"></select></div>
+
+            <div class="resource-section">
+                <div class="resource-label"><span>🔴 DON!! 卡</span><span class="resource-count" id="don-count">0 / 10</span></div>
+                <div class="dots-container" id="don-dots"></div>
+            </div>
+        </div>
+
+        <!-- ── Opponent Field ── -->
+        <div class="panel opp-field">
+            <div class="panel-title"><span class="icon">⚓</span> 對方場面</div>
+            <div class="char-row leader-row">
+                <span class="char-icon">👑</span><span class="char-label">Leader</span>
+                <select class="power-select" id="opp-leader" onchange="onPowerChange(this)"></select>
+            </div>
+            <div class="blocker-row" data-index="0" onclick="toggleBlocker(this)"><span class="blocker-icon">🛡️</span><span class="blocker-label">Blocker 1</span><div class="blocker-toggle"></div></div>
+            <div class="blocker-row" data-index="1" onclick="toggleBlocker(this)"><span class="blocker-icon">🛡️</span><span class="blocker-label">Blocker 2</span><div class="blocker-toggle"></div></div>
+            <div class="blocker-row" data-index="2" onclick="toggleBlocker(this)"><span class="blocker-icon">🛡️</span><span class="blocker-label">Blocker 3</span><div class="blocker-toggle"></div></div>
+            <div class="blocker-row" data-index="3" onclick="toggleBlocker(this)"><span class="blocker-icon">🛡️</span><span class="blocker-label">Blocker 4</span><div class="blocker-toggle"></div></div>
+            <div class="blocker-row" data-index="4" onclick="toggleBlocker(this)"><span class="blocker-icon">🛡️</span><span class="blocker-label">Blocker 5</span><div class="blocker-toggle"></div></div>
+
+            <div class="resource-section">
+                <div class="resource-label"><span>❤️ 生命卡</span><span class="resource-count" id="life-count">0</span></div>
+                <div class="dots-container" id="life-dots"></div>
+            </div>
+
+            <div class="resource-section">
+                <div class="resource-label"><span>🃏 對方手牌（側防預估）</span></div>
+                <div class="hand-cards-container" id="hand-cards"></div>
+                <div class="click-hint">點擊切換：無側防 → 1K → 2K → 無側防</div>
+                <div class="counter-quick-actions">
+                    <button type="button" class="quick-btn" onclick="setAllCounters(0)">全部清空</button>
+                    <button type="button" class="quick-btn" onclick="setAllCounters(1)">全設 1K</button>
+                    <button type="button" class="quick-btn" onclick="setAllCounters(2)">全設 2K</button>
+                </div>
+                <div class="counter-summary" id="counter-summary">側防總計：<strong>0 張</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Result ── -->
+    <div class="result-panel" id="result-panel">
+        <div class="prob-section" id="prob-section">
+            <div class="prob-title">⚔️ 調整場面狀態以計算斬殺</div>
+        </div>
+        <div id="result-details"></div>
+    </div>
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────
+const state = {
+    myLeader: 5, myChars: [0,0,0,0,0], donCards: 0,
+    oppLeader: 5, blockers: [false,false,false,false,false],
+    lifeCards: 0,
+    counterHand: [0,0,0,0,0,0,0,0,0,0]   // each: 0=none, 1=1K, 2=2K
+};
+
+// ─── Init ─────────────────────────────────────────────
+function init() {
+    document.querySelectorAll('.power-select').forEach(sel => {
+        for (let i = 0; i <= 13; i++) {
+            const o = document.createElement('option');
+            o.value = i; o.textContent = i + 'K'; sel.appendChild(o);
+        }
+    });
+    document.getElementById('my-leader').value = 5;
+    document.getElementById('opp-leader').value = 5;
+
+    createDots('don-dots', 10, 'don-dot', i => setDon(i));
+    createDots('life-dots', 10, 'life-dot', i => setLife(i));
+    createHandCards();
+
+    updateSelectStyles(); calculate();
+}
+
+function createDots(containerId, count, cls, handler) {
+    const c = document.getElementById(containerId);
+    for (let i = 1; i <= count; i++) {
+        const d = document.createElement('div');
+        d.className = 'dot ' + cls; d.textContent = i; d.dataset.value = i;
+        d.addEventListener('click', () => handler(i)); c.appendChild(d);
+    }
+}
+
+function createHandCards() {
+    const c = document.getElementById('hand-cards');
+    for (let i = 0; i < 10; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'hand-card-slot';
+
+        const card = document.createElement('div');
+        card.className = 'hand-card';
+        card.dataset.index = i;
+        card.textContent = '—';
+        card.addEventListener('click', () => cycleCard(i));
+
+        const num = document.createElement('div');
+        num.className = 'hand-card-num';
+        num.textContent = i + 1;
+
+        slot.appendChild(card);
+        slot.appendChild(num);
+        c.appendChild(slot);
+    }
+}
+
+// ─── Event Handlers ───────────────────────────────────
+function onPowerChange(el) {
+    const v = parseInt(el.value);
+    if (el.id === 'my-leader') state.myLeader = v;
+    else if (el.id === 'opp-leader') state.oppLeader = v;
+    else if (el.classList.contains('my-char')) state.myChars[parseInt(el.dataset.index)] = v;
+    updateSelectStyles(); calculate();
+}
+
+function setDon(v) {
+    state.donCards = state.donCards === v ? 0 : v;
+    updateDots('don-dot', state.donCards);
+    document.getElementById('don-count').textContent = state.donCards + ' / 10';
+    calculate();
+}
+
+function setLife(v) {
+    state.lifeCards = state.lifeCards === v ? 0 : v;
+    updateDots('life-dot', state.lifeCards);
+    document.getElementById('life-count').textContent = state.lifeCards;
+    calculate();
+}
+
+function cycleCard(idx) {
+    // Cycle: 0 → 1 → 2 → 0
+    state.counterHand[idx] = (state.counterHand[idx] + 1) % 3;
+    refreshHandCardUI(idx);
+    updateCounterSummary();
+    calculate();
+}
+
+function setAllCounters(val) {
+    for (let i = 0; i < 10; i++) {
+        state.counterHand[i] = val;
+        refreshHandCardUI(i);
+    }
+    updateCounterSummary();
+    calculate();
+}
+
+function refreshHandCardUI(idx) {
+    const card = document.querySelectorAll('.hand-card')[idx];
+    const v = state.counterHand[idx];
+    card.className = 'hand-card' + (v > 0 ? ' val-' + v : '');
+    card.textContent = v === 0 ? '—' : v + 'K';
+}
+
+function updateCounterSummary() {
+    const n1 = state.counterHand.filter(c => c === 1).length;
+    const n2 = state.counterHand.filter(c => c === 2).length;
+    const total = n1 + n2;
+    const totalK = n1 + n2 * 2;
+    let detail = '';
+    if (total > 0) {
+        const parts = [];
+        if (n1 > 0) parts.push(n1 + '×1K');
+        if (n2 > 0) parts.push(n2 + '×2K');
+        detail = ` (${parts.join(' + ')}) = <span class="c-purple">${totalK}K</span>`;
+    }
+    document.getElementById('counter-summary').innerHTML =
+        `側防總計：<strong>${total} 張</strong>${detail}`;
+}
+
+function toggleBlocker(el) {
+    const i = parseInt(el.dataset.index);
+    state.blockers[i] = !state.blockers[i];
+    el.classList.toggle('active', state.blockers[i]); calculate();
+}
+
+function updateDots(cls, val) {
+    document.querySelectorAll('.' + cls).forEach(d =>
+        d.classList.toggle('active', parseInt(d.dataset.value) <= val));
+}
+
+function updateSelectStyles() {
+    document.querySelectorAll('.power-select').forEach(s =>
+        s.classList.toggle('is-zero', parseInt(s.value) === 0));
+}
+
+function resetAll() {
+    state.myLeader = 5; state.myChars = [0,0,0,0,0]; state.donCards = 0;
+    state.oppLeader = 5; state.blockers = [false,false,false,false,false];
+    state.lifeCards = 0; state.counterHand = [0,0,0,0,0,0,0,0,0,0];
+
+    document.getElementById('my-leader').value = 5;
+    document.getElementById('opp-leader').value = 5;
+    document.querySelectorAll('.my-char').forEach(s => s.value = 0);
+    document.querySelectorAll('.blocker-row').forEach(r => r.classList.remove('active'));
+    updateDots('don-dot', 0); updateDots('life-dot', 0);
+    document.getElementById('don-count').textContent = '0 / 10';
+    document.getElementById('life-count').textContent = '0';
+    for (let i = 0; i < 10; i++) refreshHandCardUI(i);
+    updateCounterSummary();
+    updateSelectStyles(); calculate();
+}
+
+// ─── Helpers: counter composition for k cards ─────────
+function getCounterComposition(k) {
+    // From configured hand, pick k strongest cards (2K first, then 1K).
+    // For k > total configured, add hypothetical 2K cards.
+    const n1All = state.counterHand.filter(c => c === 1).length;
+    const n2All = state.counterHand.filter(c => c === 2).length;
+    const N = n1All + n2All;
+    if (k <= N) {
+        const u2 = Math.min(k, n2All);
+        const u1 = Math.min(k - u2, n1All);
+        return { n1: u1, n2: u2 };
+    } else {
+        return { n1: n1All, n2: n2All + (k - N) };
+    }
+}
+
+function getTotalConfigured() {
+    return state.counterHand.filter(c => c > 0).length;
+}
+
+// ─── Core Calculation ─────────────────────────────────
+function calculate() {
+    const oL = state.oppLeader, B = state.blockers.filter(b => b).length;
+    const life = state.lifeCards, D = state.donCards;
+    const N = getTotalConfigured();
+
+    // 1. Gather attackers
+    const attackers = [];
+    if (state.myLeader > 0) attackers.push({ name: 'Leader', power: state.myLeader, icon: '👑' });
+    for (let i = 0; i < 5; i++) if (state.myChars[i] > 0)
+        attackers.push({ name: '角色 ' + (i+1), power: state.myChars[i], icon: '⚔️' });
+
+    const hitsNeeded = life + 1;
+    const totalNeeded = hitsNeeded + B;
+
+    if (attackers.length === 0) { renderNotPossible('場上沒有攻擊者', 0, totalNeeded); return; }
+
+    // 2. DON needed per attacker
+    attackers.forEach(a => { a.donNeeded = Math.max(0, oL - a.power); });
+    attackers.sort((a, b) => a.donNeeded - b.donNeeded);
+
+    // 3. Greedily select ALL that can reach threshold
+    let donUsed = 0;
+    const eligible = [];
+    for (const a of attackers) {
+        if (donUsed + a.donNeeded <= D) {
+            eligible.push({ ...a, don: a.donNeeded, finalPower: a.power + a.donNeeded, excess: a.power + a.donNeeded - oL });
+            donUsed += a.donNeeded;
+        }
+    }
+
+    if (eligible.length < totalNeeded) {
+        renderNotPossible(
+            eligible.length < attackers.length ? 'DON!! 不足以讓足夠的攻擊者達到門檻' : '攻擊者數量不足',
+            eligible.length, totalNeeded
+        );
+        return;
+    }
+
+    // 4. Distribute remaining DON (water-fill to equalise excess)
+    waterFillDon(eligible, D - donUsed);
+
+    // 5. Counter analysis for each possible counter count 0..10
+    const breakdown = [];
+    let threshold = -1;
+    for (let k = 0; k <= 10; k++) {
+        const { n1, n2 } = getCounterComposition(k);
+        const ok = isLethalWithCounters(eligible, B, life, n1, n2);
+        breakdown.push({ k, ok });
+        if (ok) threshold = k;
+    }
+
+    // 6. Probability (Gaussian around configured count N)
+    const sigma = 1.5;
+    let weights = [], wSum = 0;
+    for (let k = 0; k <= 10; k++) {
+        const w = Math.exp(-0.5 * Math.pow((k - N) / sigma, 2));
+        weights.push(w); wSum += w;
+    }
+    let prob = 0;
+    for (let k = 0; k <= 10; k++) if (breakdown[k].ok) prob += weights[k] / wSum;
+
+    // 7. Build attack plan for display (with configured hand)
+    const { n1: pn1, n2: pn2 } = getCounterComposition(N);
+    const plan = buildPlan(eligible, B, life, oL, pn1, pn2);
+
+    renderResult({ eligible, plan, threshold, prob, breakdown, N, hitsNeeded, totalNeeded, B, life, oL, D });
+}
+
+// ─── Water-fill DON distribution ──────────────────────
+function waterFillDon(attacks, remaining) {
+    if (remaining <= 0 || attacks.length === 0) return;
+    attacks.sort((a, b) => a.excess - b.excess);
+    let left = remaining;
+    const n = attacks.length;
+    while (left > 0) {
+        const minE = attacks[0].excess;
+        let cnt = 0;
+        while (cnt < n && attacks[cnt].excess === minE) cnt++;
+        if (cnt === n) {
+            const per = Math.floor(left / n), rem = left % n;
+            for (let j = 0; j < n; j++) { const x = per + (j < rem ? 1 : 0); attacks[j].don += x; attacks[j].finalPower += x; attacks[j].excess += x; }
+            left = 0;
+        } else {
+            const gap = attacks[cnt].excess - minE, need = gap * cnt;
+            if (need <= left) {
+                for (let j = 0; j < cnt; j++) { attacks[j].don += gap; attacks[j].finalPower += gap; attacks[j].excess += gap; }
+                left -= need;
+            } else {
+                const per = Math.floor(left / cnt), rem = left % cnt;
+                for (let j = 0; j < cnt; j++) { const x = per + (j < rem ? 1 : 0); attacks[j].don += x; attacks[j].finalPower += x; attacks[j].excess += x; }
+                left = 0;
+            }
+        }
+    }
+}
+
+// ─── Exact Optimal Defense with mixed 1K/2K counters ─
+function getOptimalDefense(thresholds, n1, n2) {
+    const memo = new Map();
+
+    function search(idx, r1, r2) {
+        if (idx >= thresholds.length || (r1 === 0 && r2 === 0)) {
+            return { blockedCount: 0, remValue: r1 + r2 * 2, remCards: r1 + r2, choices: [] };
+        }
+        const key = `${idx},${r1},${r2}`;
+        if (memo.has(key)) return memo.get(key);
+
+        const t = thresholds[idx];
+
+        // Option 1: Don't block attack idx
+        const skipSub = search(idx + 1, r1, r2);
+        let best = {
+            blockedCount: skipSub.blockedCount,
+            remValue: skipSub.remValue,
+            remCards: skipSub.remCards,
+            choices: [{ blocked: false, use1: 0, use2: 0 }, ...skipSub.choices]
+        };
+
+        // Option 2: Try all minimal (u1, u2) that satisfy u1 + 2*u2 >= t
+        const maxU2 = Math.min(r2, Math.ceil(t / 2));
+        for (let u2 = 0; u2 <= maxU2; u2++) {
+            const u1 = Math.max(0, t - u2 * 2);
+            if (u1 <= r1) {
+                const sub = search(idx + 1, r1 - u1, r2 - u2);
+                const count = sub.blockedCount + 1;
+                const isBetter =
+                    count > best.blockedCount ||
+                    (count === best.blockedCount && sub.remValue > best.remValue) ||
+                    (count === best.blockedCount && sub.remValue === best.remValue && sub.remCards > best.remCards);
+
+                if (isBetter) {
+                    best = {
+                        blockedCount: count,
+                        remValue: sub.remValue,
+                        remCards: sub.remCards,
+                        choices: [{ blocked: true, use1: u1, use2: u2 }, ...sub.choices]
+                    };
+                }
+            }
+        }
+
+        memo.set(key, best);
+        return best;
+    }
+
+    return search(0, n1, n2);
+}
+
+// ─── Lethal check with mixed 1K/2K counters ──────────
+function isLethalWithCounters(eligible, blockers, life, n1, n2) {
+    const sorted = [...eligible].sort((a, b) => b.excess - a.excess);
+    const ldrAtks = sorted.slice(blockers);
+    if (n1 === 0 && n2 === 0) return ldrAtks.length >= life + 1;
+
+    // Thresholds to block each attack (need counter > excess → ≥ excess+1 in K)
+    const thresholds = ldrAtks.map(a => a.excess + 1);
+    const def = getOptimalDefense(thresholds, n1, n2);
+    return (ldrAtks.length - def.blockedCount) >= life + 1;
+}
+
+// ─── Build display plan ──────────────────────────────
+function buildPlan(eligible, blockers, life, oL, n1, n2) {
+    const sorted = [...eligible].sort((a, b) => b.excess - a.excess);
+    const blockerTargets = sorted.slice(0, blockers);
+    const ldrAtks = sorted.slice(blockers);
+
+    const thresholds = ldrAtks.map(a => a.excess + 1);
+    const def = getOptimalDefense(thresholds, n1, n2);
+
+    const withInfo = ldrAtks.map((a, i) => {
+        const ch = (def.choices && def.choices[i]) ? def.choices[i] : { blocked: false, use1: 0, use2: 0 };
+        const parts = [];
+        if (ch.use1 > 0) parts.push(ch.use1 + '×1K');
+        if (ch.use2 > 0) parts.push(ch.use2 + '×2K');
+        return {
+            ...a,
+            countered: ch.blocked,
+            counterDetail: parts.join(' + ')
+        };
+    });
+
+    // Assemble plan
+    const plan = [];
+    for (const a of [...blockerTargets].sort((x, y) => x.excess - y.excess))
+        plan.push({ ...a, stepType: 'blocked', resultText: '🛡️ 被 Blocker 擋下' });
+
+    const countered = withInfo.filter(a => a.countered).sort((a, b) => a.excess - b.excess);
+    const hitting   = withInfo.filter(a => !a.countered).sort((a, b) => a.excess - b.excess);
+
+    for (const a of countered)
+        plan.push({ ...a, stepType: 'countered', resultText: `🃏 被側防 (${a.counterDetail})` });
+
+    let lifeLeft = life;
+    for (const a of hitting) {
+        if (lifeLeft > 0) {
+            plan.push({ ...a, stepType: 'hit-life', resultText: `❤️ 生命 ${lifeLeft} → ${lifeLeft - 1}` });
+            lifeLeft--;
+        } else {
+            plan.push({ ...a, stepType: 'lethal-blow', resultText: '💀 斬殺！' });
+        }
+    }
+    return plan;
+}
+
+// ─── Rendering ────────────────────────────────────────
+function renderNotPossible(reason, available, needed) {
+    const panel = document.getElementById('result-panel');
+    panel.className = 'result-panel not-lethal';
+    const pct = needed > 0 ? Math.min(100, Math.round(available / needed * 100)) : 0;
+    const lvl = pct >= 75 ? 'high' : pct >= 40 ? 'mid' : 'low';
+
+    document.getElementById('prob-section').innerHTML = `
+        <div class="prob-gauge" style="--pct:0%;--gauge-color:var(--accent-red)">
+            <div class="prob-gauge-inner"><div class="prob-value" style="color:var(--accent-red)">0%</div><div class="prob-label-small">斬殺機率</div></div>
+        </div>
+        <div class="prob-title" style="color:var(--accent-red)">❌ 無法斬殺</div>
+        <div class="prob-subtitle"><strong>${reason}</strong></div>`;
+
+    document.getElementById('result-details').innerHTML = `
+        <div class="progress-bar-container">
+            <div class="progress-label">基礎斬殺條件達成率</div>
+            <div class="progress-bar"><div class="progress-bar-fill ${lvl}" style="width:${pct}%"></div></div>
+            <div class="progress-text">${available} / ${needed} 次有效攻擊</div>
+        </div>`;
+}
+
+function renderResult(r) {
+    const panel = document.getElementById('result-panel');
+    const pctNum = Math.round(r.prob * 100);
+
+    if (pctNum >= 80) panel.className = 'result-panel lethal';
+    else if (pctNum >= 30) panel.className = 'result-panel partial';
+    else panel.className = 'result-panel not-lethal';
+
+    const gaugeColor = pctNum >= 80 ? 'var(--accent-green)' : pctNum >= 50 ? 'var(--accent-gold)' : 'var(--accent-red)';
+    const titleIcon = pctNum >= 80 ? '✅' : pctNum >= 50 ? '⚠️' : '❌';
+    const titleText = pctNum >= 80 ? '高機率斬殺！🏴‍☠️' : pctNum >= 50 ? '有機會斬殺' : pctNum > 0 ? '斬殺困難' : '無法斬殺';
+    const thText = r.threshold >= 10 ? '10+ 張' : r.threshold >= 0 ? r.threshold + ' 張' : '0 張';
+
+    // Counter hand summary
+    const n1All = state.counterHand.filter(c => c === 1).length;
+    const n2All = state.counterHand.filter(c => c === 2).length;
+    const totalK = n1All + n2All * 2;
+    let handDesc = `${r.N} 張`;
+    if (r.N > 0) {
+        const p = [];
+        if (n1All > 0) p.push(n1All + '×1K');
+        if (n2All > 0) p.push(n2All + '×2K');
+        handDesc += ` (${p.join(' + ')} = ${totalK}K)`;
+    }
+
+    document.getElementById('prob-section').innerHTML = `
+        <div class="prob-gauge" style="--pct:${pctNum}%;--gauge-color:${gaugeColor}">
+            <div class="prob-gauge-inner">
+                <div class="prob-value" style="color:${gaugeColor}">${pctNum}%</div>
+                <div class="prob-label-small">斬殺機率</div>
+            </div>
+        </div>
+        <div class="prob-title" style="color:${gaugeColor}">${titleIcon} ${titleText}</div>
+        <div class="prob-subtitle">
+            最多可承受 <strong style="color:var(--accent-green)">${thText}</strong> 側防卡<br>
+            預估對方手牌側防：<strong style="color:var(--accent-purple)">${handDesc}</strong>
+        </div>`;
+
+    // Details
+    let html = '';
+
+    // Counter analysis grid
+    html += '<div class="counter-analysis">';
+    html += '<div class="counter-analysis-title">🃏 側防卡分析</div>';
+    html += '<div class="counter-grid">';
+    for (let k = 0; k <= 10; k++) {
+        const isEst = k === r.N;
+        const cls = r.breakdown[k].ok ? 'lethal-cell' : 'not-lethal-cell';
+        html += `<div class="counter-cell ${cls} ${isEst ? 'estimated' : ''}">
+            ${r.breakdown[k].ok ? '✅' : '❌'}<br>${k}張
+            ${isEst ? '<span class="cell-label">配置</span>' : ''}
+        </div>`;
+    }
+    html += '</div>';
+    html += `<div class="threshold-info">
+        ▸ 基礎斬殺（無側防）：<strong>✅ 可行</strong>，需 <strong>${r.totalNeeded}</strong> 次有效攻擊（生命${r.life} + 致命1 + Blocker${r.B}）<br>
+        ▸ 側防承受上限：<span class="threshold-num">${thText}</span>
+        ${r.N > 0 ? (r.threshold >= r.N
+            ? '　→ 配置 <span class="estimate-num">' + r.N + ' 張</span> 在承受範圍內 ✅'
+            : '　→ 配置 <span class="estimate-num">' + r.N + ' 張</span> 超出承受範圍 ❌') : ''}
+    </div>`;
+    html += '</div>';
+
+    // Attack plan
+    html += '<div class="attack-plan">';
+    html += `<div class="attack-plan-title">⚔️ 攻擊計劃${r.N > 0 ? '（對方 ' + r.N + ' 張側防）' : ''}</div>`;
+    r.plan.forEach((s, i) => {
+        const donText = s.don > 0
+            ? `${s.power}K <span class="don-boost">+${s.don} DON!!</span> = ${s.finalPower}K`
+            : `${s.finalPower}K`;
+        html += `<div class="attack-step ${s.stepType}">
+            <div class="step-number">${i + 1}</div>
+            <div class="step-attacker">
+                <div class="name">${s.icon} ${s.name}</div>
+                <div class="power-detail">${donText} → 攻擊對方 Leader (${r.oL}K)</div>
+            </div>
+            <div class="step-result">${s.resultText}</div>
+        </div>`;
+    });
+
+    const totalDonUsed = r.eligible.reduce((s, a) => s + a.don, 0);
+    html += `<div class="don-summary">
+        <span>DON!! 使用：<span class="don-used">${totalDonUsed} 張</span></span>
+        <span>剩餘 DON!!：<span class="don-remaining">${r.D - totalDonUsed} 張</span></span>
+    </div>`;
+    html += '</div>';
+
+    document.getElementById('result-details').innerHTML = html;
+}
+
+// ─── Start ────────────────────────────────────────────
+init();
+
+// Register Service Worker for offline mobile app support
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then((reg) => {
+            console.log('SW registered successfully:', reg.scope);
+        }).catch((err) => {
+            console.log('SW registration failed:', err);
+        });
+    });
+}
+</script>
+</body>
+</html>
