@@ -374,6 +374,135 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg-primary); }
         ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+        /* ── Tab System ── */
+        .tab-bar { display: flex; gap: 6px; justify-content: center; margin-top: 14px; }
+        .tab-btn {
+            padding: 8px 22px; border-radius: 10px; border: 2px solid var(--border-color);
+            background: var(--bg-primary); color: var(--text-muted);
+            font-size: 0.88rem; font-weight: 700; font-family: inherit;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .tab-btn:hover { border-color: var(--border-highlight); color: var(--text-secondary); }
+        .tab-btn.active { background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark)); border-color: var(--accent-gold); color: #000; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ── Simulator ── */
+        .sim-score-bar {
+            text-align: center; padding: 10px 14px; margin-bottom: 16px;
+            background: var(--bg-secondary); border: 1px solid var(--border-color);
+            border-radius: 12px; font-size: 0.85rem; color: var(--text-secondary);
+        }
+        .sim-score-bar .score-num { font-size: 1.3rem; font-weight: 800; color: var(--accent-gold); }
+        .sim-board { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+        @media (max-width: 700px) { .sim-board { grid-template-columns: 1fr; } }
+        .sim-info-row {
+            display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+            margin-bottom: 5px; border-radius: 10px; background: var(--bg-card);
+            border: 1px solid transparent; font-size: 0.85rem;
+        }
+        .sim-info-row.leader-row { border-color: var(--border-highlight); background: linear-gradient(135deg, var(--bg-card), var(--bg-tertiary)); }
+        .sim-info-row .info-icon { font-size: 1.1rem; width: 28px; text-align: center; flex-shrink: 0; }
+        .sim-info-row .info-label { flex: 1; color: var(--text-secondary); }
+        .sim-info-row .info-value { font-weight: 700; color: var(--text-primary); min-width: 36px; text-align: right; }
+        .sim-alloc-section {
+            background: var(--bg-secondary); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 20px; margin-bottom: 16px;
+        }
+        .sim-alloc-title {
+            font-size: 1rem; font-weight: 700; color: var(--accent-gold); margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .alloc-row {
+            display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+            margin-bottom: 5px; border-radius: 10px; background: var(--bg-card);
+            border: 1px solid var(--border-color); transition: border-color 0.2s;
+        }
+        .alloc-row.meets { border-color: rgba(46, 204, 113, 0.3); }
+        .alloc-row.below { border-color: rgba(230, 57, 70, 0.15); opacity: 0.6; }
+        .alloc-name { flex: 1; font-size: 0.85rem; }
+        .alloc-name .aname { font-weight: 600; }
+        .alloc-name .abp { color: var(--text-muted); font-size: 0.8rem; }
+        .alloc-controls { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+        .alloc-btn {
+            width: 30px; height: 30px; border-radius: 50%;
+            border: 1px solid var(--border-color); background: var(--bg-primary);
+            color: var(--text-primary); font-size: 1.1rem; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s; padding: 0; font-family: inherit;
+        }
+        .alloc-btn:hover:not(:disabled) { border-color: var(--accent-gold); color: var(--accent-gold); }
+        .alloc-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+        .alloc-don-ct { width: 26px; text-align: center; font-weight: 800; font-size: 0.95rem; color: var(--don-color); }
+        .alloc-arrow { color: var(--text-muted); font-size: 0.8rem; margin: 0 3px; }
+        .alloc-final { font-weight: 700; font-size: 0.9rem; min-width: 36px; text-align: right; }
+        .alloc-final.ok { color: var(--accent-green); }
+        .alloc-final.no { color: var(--accent-red); }
+        .don-rem-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 14px; margin-top: 10px; border-radius: 10px;
+            background: var(--bg-primary); border: 1px solid var(--border-color);
+            font-size: 0.85rem; color: var(--text-secondary);
+        }
+        .don-rem-bar .rem-num { font-weight: 800; font-size: 1.1rem; color: var(--don-color); }
+        .sim-actions {
+            display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .sim-btn {
+            padding: 12px 28px; border-radius: 12px; border: 2px solid transparent;
+            font-size: 1rem; font-weight: 700; font-family: inherit;
+            cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .sim-btn:hover:not(:disabled) { transform: translateY(-2px); }
+        .sim-btn.lethal-btn { background: linear-gradient(135deg, var(--accent-green), var(--accent-green-dark)); color: #fff; }
+        .sim-btn.lethal-btn:hover:not(:disabled) { box-shadow: 0 4px 20px rgba(46, 204, 113, 0.3); }
+        .sim-btn.pass-btn { background: linear-gradient(135deg, var(--accent-red), #b02a35); color: #fff; }
+        .sim-btn.pass-btn:hover:not(:disabled) { box-shadow: 0 4px 20px rgba(230, 57, 70, 0.3); }
+        .sim-btn.new-btn { background: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border-color); }
+        .sim-btn.new-btn:hover { border-color: var(--border-highlight); }
+        .sim-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
+        .sim-result {
+            background: var(--bg-secondary); border: 2px solid var(--border-color);
+            border-radius: 16px; padding: 24px; transition: all 0.3s;
+        }
+        .sim-result.correct { border-color: var(--accent-green); }
+        .sim-result.wrong { border-color: var(--accent-red); }
+        .sim-result-header { text-align: center; margin-bottom: 16px; }
+        .sim-result-icon { font-size: 2.5rem; margin-bottom: 8px; }
+        .sim-result-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 4px; }
+        .sim-result-subtitle { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+        .hand-reveal { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-color); }
+        .hand-reveal-title { font-size: 0.9rem; font-weight: 700; color: var(--accent-purple); margin-bottom: 10px; }
+        .hand-reveal-cards { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+        .sim-plan { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-color); }
+        .sim-plan-title { font-size: 0.9rem; font-weight: 700; color: var(--accent-gold); margin-bottom: 12px; }
+
+        /* ── Difficulty Selector ── */
+        .sim-difficulty { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
+        .diff-btn {
+            padding: 8px 22px; border-radius: 10px; border: 2px solid var(--border-color);
+            background: var(--bg-primary); color: var(--text-muted);
+            font-size: 0.85rem; font-weight: 700; font-family: inherit;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .diff-btn:hover { border-color: var(--border-highlight); color: var(--text-secondary); }
+        .diff-btn.active { border-color: var(--accent-gold); color: var(--accent-gold); background: rgba(240, 178, 50, 0.1); }
+
+        /* ── Attack Order Controls ── */
+        .order-controls { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; margin-right: 4px; }
+        .order-btn {
+            width: 22px; height: 18px; border-radius: 4px; border: 1px solid var(--border-color);
+            background: var(--bg-primary); color: var(--text-muted); font-size: 0.65rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s; padding: 0; font-family: inherit;
+        }
+        .order-btn:hover:not(:disabled) { border-color: var(--accent-gold); color: var(--accent-gold); }
+        .order-btn:disabled { opacity: 0.15; cursor: not-allowed; }
+        .alloc-order-num {
+            width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: 800; color: var(--text-muted); background: var(--bg-primary);
+            border: 1px solid var(--border-color); flex-shrink: 0; margin-right: 4px;
+        }
     </style>
 </head>
 <body>
@@ -381,9 +510,14 @@
     <header>
         <h1>⚔️ OPTCG 斬殺計算機</h1>
         <div class="subtitle">Lethal Calculator</div>
-        <div class="header-actions"><button class="reset-btn" onclick="resetAll()">🔄 重置</button></div>
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="calc" onclick="switchTab('calc')">⚔️ 計算機</button>
+            <button class="tab-btn" data-tab="sim" onclick="switchTab('sim')">🎯 模擬練習</button>
+        </div>
     </header>
 
+    <div id="tab-calc" class="tab-content active">
+    <div class="header-actions" style="text-align:center;margin-bottom:12px"><button class="reset-btn" onclick="resetAll()">🔄 重置</button></div>
     <div class="battlefield">
         <!-- ── My Field ── -->
         <div class="panel my-field">
@@ -442,6 +576,15 @@
             <div class="prob-title">⚔️ 調整場面狀態以計算斬殺</div>
         </div>
         <div id="result-details"></div>
+    </div>
+    </div><!-- end tab-calc -->
+
+    <div id="tab-sim" class="tab-content">
+        <div class="sim-score-bar" id="sim-score">得分：<span class="score-num">0</span> / <span class="score-num">0</span></div>
+        <div id="sim-board-area"></div>
+        <div id="sim-alloc-area"></div>
+        <div class="sim-actions" id="sim-actions"></div>
+        <div id="sim-result-area"></div>
     </div>
 </div>
 
@@ -819,6 +962,7 @@ function buildPlan(eligible, blockers, life, oL, n1, n2) {
             lifeLeft--;
         } else {
             plan.push({ ...a, stepType: 'lethal-blow', resultText: '💀 斬殺！' });
+            break;
         }
     }
     return plan;
@@ -934,6 +1078,642 @@ function renderResult(r) {
     html += '</div>';
 
     document.getElementById('result-details').innerHTML = html;
+}
+
+// ─── Tab System ──────────────────────────────────────
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    if (tab === 'sim' && !simState.scenario) generateNewScenario();
+}
+
+// ─── Simulator ───────────────────────────────────────
+const simState = { scenario: null, donAlloc: [], order: [], revealed: false, difficulty: 'advanced', score: { correct: 0, total: 0 } };
+
+function setDifficulty(diff) {
+    simState.difficulty = diff;
+    simState.score = { correct: 0, total: 0 };
+    simState.scenario = null;
+    generateNewScenario();
+}
+
+// ─── 題目品質評分引擎 ─────────────────────────────────
+// 核心理念：「差之毫釐，失之千里」
+// 好題目 = 唯一正解 + 多個誘人陷阱 + 極限容錯
+function rateScenario(sc, opt, diff, targetLethal) {
+    if (opt.isLethal !== targetLethal) return -1000;
+
+    let score = 0;
+    const isAdv = diff === 'advanced';
+    const totalCounterValue = sc.hand.reduce((s, c) => s + c, 0);
+    const counterCards = sc.hand.filter(c => c > 0).length;
+    const needed = sc.life + 1 + sc.blockers;
+    const totalAttackers = 1 + sc.myChars.length;
+    const n1 = sc.hand.filter(c => c === 1).length;
+    const n2 = sc.hand.filter(c => c === 2).length;
+
+    // ── 攻頻偏好：2~3 個攻擊者最精妙 ──
+    if (totalAttackers === 2) score += 30;
+    else if (totalAttackers === 3) score += 40;
+    else if (totalAttackers === 4) score += 10;
+    else score -= 50;
+
+    if (targetLethal) {
+        // ═══ 可斬殺題：追求「差一點就不行」的極限精妙 ═══
+
+        // ① DON 極限容錯檢驗（最核心指標）
+        const optM1 = computeOptimal({ ...sc, donCards: Math.max(0, sc.donCards - 1) });
+        if (!optM1.isLethal) {
+            // 少 1 DON 即死 → 0 容錯，極限題！
+            score += 80;
+        } else {
+            const optM2 = computeOptimal({ ...sc, donCards: Math.max(0, sc.donCards - 2) });
+            if (!optM2.isLethal) score += 35;
+            else score -= 20; // DON 過於寬裕，缺乏張力
+        }
+
+        // ② 「陷阱分配」檢驗：存在看似合理但會失敗的 DON 分配方式
+        if (opt.elig && opt.elig.length >= 2) {
+            let trapCount = 0;
+            const elig = opt.elig;
+
+            // 測試「平均分配」是否會失敗（常見直覺陷阱）
+            const evenDon = Math.floor(sc.donCards / elig.length);
+            const evenElig = elig.map(a => ({
+                ...a,
+                don: evenDon,
+                finalPower: a.power + evenDon,
+                excess: a.power + evenDon - sc.oppLeader
+            })).filter(a => a.finalPower >= sc.oppLeader);
+            if (evenElig.length >= needed) {
+                const evenOk = isLethalWithCounters(evenElig, sc.blockers, sc.life, n1, n2);
+                if (!evenOk) trapCount++; // 平均分配是陷阱！
+            }
+
+            // 測試「全灌最強角色」是否會失敗
+            const strongest = [...elig].sort((a, b) => b.power - a.power)[0];
+            const allInElig = elig.map(a => {
+                const d = a === strongest ? sc.donCards : 0;
+                const fp = a.power + d;
+                return { ...a, don: d, finalPower: fp, excess: fp - sc.oppLeader };
+            }).filter(a => a.finalPower >= sc.oppLeader);
+            if (allInElig.length >= needed) {
+                const allInOk = isLethalWithCounters(allInElig, sc.blockers, sc.life, n1, n2);
+                if (!allInOk) trapCount++; // 全灌最強也是陷阱！
+            }
+
+            // 測試「全灌最弱角色」是否會失敗
+            const weakest = [...elig].sort((a, b) => a.power - b.power)[0];
+            const boostWeakElig = elig.map(a => {
+                const d = a === weakest ? sc.donCards : 0;
+                const fp = a.power + d;
+                return { ...a, don: d, finalPower: fp, excess: fp - sc.oppLeader };
+            }).filter(a => a.finalPower >= sc.oppLeader);
+            if (boostWeakElig.length >= needed) {
+                const boostOk = isLethalWithCounters(boostWeakElig, sc.blockers, sc.life, n1, n2);
+                if (!boostOk) trapCount++;
+            }
+
+            score += trapCount * (isAdv ? 20 : 35);
+        }
+
+        // ③ 對手側防品質（要有足夠防禦力製造張力）
+        if (counterCards >= 1 && totalCounterValue >= 2) score += 15;
+        if (counterCards >= 2 && totalCounterValue >= 3) score += 15;
+        if (n2 >= 1) score += 10; // 有 2K 側防增加複雜度
+
+        // ④ 角色攻擊力差異（差異越大，DON 分配越有學問）
+        if (sc.myChars.length >= 1) {
+            const allPowers = [sc.myLeader, ...sc.myChars];
+            const maxP = Math.max(...allPowers);
+            const minP = Math.min(...allPowers);
+            if (maxP - minP >= 2) score += 15; // 攻擊力差距大，分配更考驗判斷
+            if (maxP - minP >= 3) score += 10;
+        }
+
+    } else {
+        // ═══ 無法斬殺題：追求「看似能殺實則差一口氣」的假斬殺陷阱 ═══
+
+        // ① 核心：基礎攻頻必須達標（不能一眼看出不行）
+        if (opt.elig && opt.elig.length >= needed) {
+            score += 60;
+
+            // ② 測試「如果對手少 1 張側防」是否就能斬殺（極限假斬殺！）
+            if (counterCards >= 1) {
+                // 移除最弱的一張側防卡測試
+                const weakerHand = [...sc.hand];
+                const weakIdx = weakerHand.findIndex(c => c > 0);
+                if (weakIdx >= 0) {
+                    weakerHand[weakIdx] = 0;
+                    const wn1 = weakerHand.filter(c => c === 1).length;
+                    const wn2 = weakerHand.filter(c => c === 2).length;
+                    const wouldBeOk = isLethalWithCounters(opt.elig, sc.blockers, sc.life, wn1, wn2);
+                    if (wouldBeOk) {
+                        // 對手只要少一張側防就會被殺 → 極限假斬殺！
+                        score += 80;
+                    }
+                }
+            }
+
+            // ③ 側防品質恰好卡死斬殺線（不多不少）
+            if (totalCounterValue >= 2 && totalCounterValue <= 6) score += 20;
+            if (counterCards >= 2) score += 15;
+
+        } else {
+            score -= 80; // 攻頻不夠的一眼假題
+        }
+
+        // ④ 避免 DON 嚴重不足的明顯無解題
+        const minDonNeeded = sc.myChars.reduce((s, p) => s + Math.max(0, sc.oppLeader - p), 0)
+                           + Math.max(0, sc.oppLeader - sc.myLeader);
+        if (sc.donCards < minDonNeeded * 0.5) score -= 40; // DON 明顯不夠
+    }
+
+    return score;
+}
+
+// ─── 場景生成引擎 ─────────────────────────────────────
+function generateNewScenario() {
+    simState.revealed = false;
+    const diff = simState.difficulty;
+    const isAdv = diff === 'advanced';
+    const targetLethal = Math.random() < (isAdv ? 0.60 : 0.50);
+
+    let best = null;
+    let bestScore = -9999;
+
+    for (let i = 0; i < 200; i++) {
+        const sc = createRandomScenario(diff);
+        const opt = computeOptimal(sc);
+        sc.isLethal = opt.isLethal;
+        sc.optResult = opt;
+
+        const score = rateScenario(sc, opt, diff, targetLethal);
+        if (score > bestScore) {
+            bestScore = score;
+            best = sc;
+            if (bestScore >= 140) break; // 頂級精妙題，直接採用
+        }
+    }
+
+    // 如果找不到符合目標的高分題，翻轉目標重找
+    if (bestScore < 0) {
+        for (let i = 0; i < 100; i++) {
+            const sc = createRandomScenario(diff);
+            const opt = computeOptimal(sc);
+            sc.isLethal = opt.isLethal;
+            sc.optResult = opt;
+            const score = rateScenario(sc, opt, diff, !targetLethal);
+            if (score > bestScore) {
+                bestScore = score;
+                best = sc;
+            }
+        }
+    }
+
+    simState.scenario = best;
+    const n = 1 + best.myChars.length;
+    simState.donAlloc = new Array(n).fill(0);
+    simState.order = Array.from({length: n}, (_, i) => i);
+    renderSim();
+}
+
+function createRandomScenario(diff) {
+    const isAdv = diff === 'advanced';
+
+    // ── 我方 Leader ──
+    const myLeader = Math.random() < 0.5 ? 5 : 6;
+
+    // ── 我方角色（1~3 個，核心為 2~3 攻頻）──
+    const numChars = isAdv
+        ? (Math.random() < 0.35 ? 1 : 2)
+        : (Math.random() < 0.50 ? 1 : (Math.random() < 0.92 ? 2 : 3));
+
+    // 角色攻擊力：刻意製造不對稱性（大小差異越大越有分配學問）
+    const myChars = [];
+    if (isAdv) {
+        const pools = [[4,5], [5,6], [6,7], [5,7], [4,7], [5,8], [6,8], [4,6]];
+        const chosen = pools[Math.floor(Math.random() * pools.length)];
+        for (let i = 0; i < numChars; i++) myChars.push(chosen[i % chosen.length]);
+    } else {
+        // 高手模式：更極端的攻擊力差異組合
+        const pools = [[4,8], [5,9], [4,7], [5,8], [6,9], [3,7], [4,9], [5,7], [6,8]];
+        const chosen = pools[Math.floor(Math.random() * pools.length)];
+        for (let i = 0; i < numChars; i++) myChars.push(chosen[i % chosen.length]);
+    }
+
+    // ── 對方 Leader ──
+    const oppLeader = Math.random() < (isAdv ? 0.6 : 0.45) ? 5 : 6;
+
+    // ── 生命卡（0 或 1）──
+    const life = Math.random() < 0.60 ? 0 : 1;
+
+    // ── Blocker（受攻頻限制）──
+    const maxB = Math.max(0, (1 + numChars) - (life + 1));
+    const blockers = isAdv
+        ? Math.min(maxB, Math.floor(Math.random() * 2))
+        : Math.min(maxB, Math.random() < 0.30 ? 0 : (Math.random() < 0.75 ? 1 : 2));
+
+    // ── DON!! 卡：根據場面反推合理範圍 ──
+    // 計算最低斬殺 DON 需求
+    const allPowers = [myLeader, ...myChars].sort((a, b) => b - a);
+    const minDon = allPowers.slice(0, Math.min(allPowers.length, life + 1 + blockers))
+        .reduce((s, p) => s + Math.max(0, oppLeader - p), 0);
+    // DON 範圍：最低需求 ~ 最低需求+4（製造精確但不過度寬裕的題目）
+    const donCards = isAdv
+        ? Math.min(10, Math.max(3, minDon + Math.floor(Math.random() * 5)))
+        : Math.min(10, Math.max(2, minDon + Math.floor(Math.random() * 4)));
+
+    // ── 對方手牌：精心設計側防組合 ──
+    const handSize = isAdv ? (2 + Math.floor(Math.random() * 3)) : (3 + Math.floor(Math.random() * 4));
+    const hand = [];
+
+    // 側防組合模式（而非純隨機，製造更有趣的防禦結構）
+    const patterns = isAdv
+        ? [[1,1,0], [1,0,0], [2,1,0], [1,1,1], [2,0,0], [0,1,0], [1,2,0]]
+        : [[2,1,1,0], [1,1,1,1], [2,2,1,0], [2,1,0,0], [1,2,1,1], [2,2,0,0], [1,1,2,0]];
+    const pat = patterns[Math.floor(Math.random() * patterns.length)];
+    for (let i = 0; i < handSize; i++) {
+        hand.push(pat[i % pat.length]);
+    }
+
+    return { myLeader, myChars, donCards, oppLeader, blockers, life, handSize, hand };
+}
+
+function computeOptimal(sc) {
+    const atks = [{ name: 'Leader', power: sc.myLeader, icon: '👑' }];
+    for (let i = 0; i < sc.myChars.length; i++) atks.push({ name: '角色'+(i+1), power: sc.myChars[i], icon: '⚔️' });
+    const oL = sc.oppLeader, B = sc.blockers, life = sc.life, D = sc.donCards;
+    atks.forEach(a => { a.donNeeded = Math.max(0, oL - a.power); });
+    atks.sort((a,b) => a.donNeeded - b.donNeeded);
+    let used = 0; const elig = [];
+    for (const a of atks) {
+        if (used + a.donNeeded <= D) {
+            elig.push({ ...a, don: a.donNeeded, finalPower: a.power + a.donNeeded, excess: a.power + a.donNeeded - oL });
+            used += a.donNeeded;
+        }
+    }
+    const needed = life + 1 + B;
+    if (elig.length < needed) return { isLethal: false, reason: '攻擊次數不足', elig, plan: [] };
+    waterFillDon(elig, D - used);
+    const n1 = sc.hand.filter(c => c===1).length, n2 = sc.hand.filter(c => c===2).length;
+    const ok = isLethalWithCounters(elig, B, life, n1, n2);
+    const plan = buildPlan(elig, B, life, oL, n1, n2);
+    return { isLethal: ok, elig, plan };
+}
+
+function solveOrderedDefense(orderedAtks, blockers, life, oL, n1, n2) {
+    const memo = new Map();
+
+    function isBetter(a, b) {
+        if (a.survived !== b.survived) return a.survived;
+        if (!a.survived) {
+            if (a.lethalStep !== b.lethalStep) return a.lethalStep > b.lethalStep;
+        } else {
+            if (a.finalLife !== b.finalLife) return a.finalLife > b.finalLife;
+        }
+        return a.remVal > b.remVal;
+    }
+
+    function search(idx, b, r1, r2, l) {
+        if (idx >= orderedAtks.length) {
+            return {
+                survived: true,
+                lethalStep: idx,
+                finalLife: l,
+                remVal: r1 + r2 * 2 + b * 10,
+                steps: []
+            };
+        }
+
+        const key = `${idx},${b},${r1},${r2},${l}`;
+        if (memo.has(key)) return memo.get(key);
+
+        const A = orderedAtks[idx];
+        const T = Math.max(1, A.excess + 1);
+        let best = null;
+
+        // Option 1: Block with Blocker
+        if (b > 0) {
+            const sub = search(idx + 1, b - 1, r1, r2, l);
+            const cand = {
+                ...sub,
+                steps: [{ ...A, stepType: 'blocked', resultText: '🛡️ 被 Blocker 擋下' }, ...sub.steps]
+            };
+            if (!best || isBetter(cand, best)) best = cand;
+        }
+
+        // Option 2: Counter with cards from hand
+        const maxU2 = Math.min(r2, Math.ceil(T / 2));
+        for (let u2 = 0; u2 <= maxU2; u2++) {
+            const u1 = Math.max(0, T - u2 * 2);
+            if (u1 <= r1) {
+                if ((u1 > 0 && (u1 - 1 + u2 * 2 >= T)) || (u2 > 0 && (u1 + (u2 - 1) * 2 >= T))) {
+                    continue;
+                }
+                const sub = search(idx + 1, b, r1 - u1, r2 - u2, l);
+                const parts = [];
+                if (u1 > 0) parts.push(u1 + '×1K');
+                if (u2 > 0) parts.push(u2 + '×2K');
+                const cand = {
+                    ...sub,
+                    steps: [{ ...A, stepType: 'countered', resultText: `🃏 被側防 (${parts.join(' + ')})` }, ...sub.steps]
+                };
+                if (!best || isBetter(cand, best)) best = cand;
+            }
+        }
+
+        // Option 3: Take hit to Life (only if life > 0)
+        if (l > 0) {
+            const sub = search(idx + 1, b, r1, r2, l - 1);
+            const cand = {
+                ...sub,
+                steps: [{ ...A, stepType: 'hit-life', resultText: `❤️ 生命 ${l} → ${l - 1}` }, ...sub.steps]
+            };
+            if (!best || isBetter(cand, best)) best = cand;
+        }
+
+        // Option 4: Lethal blow (when life == 0)
+        // Attack lands on 0 life -> lethal blow lands and battle ends immediately!
+        if (l === 0) {
+            const cand = {
+                survived: false,
+                lethalStep: idx,
+                finalLife: 0,
+                remVal: r1 + r2 * 2 + b * 10,
+                steps: [{ ...A, stepType: 'lethal-blow', resultText: '💀 斬殺！' }]
+            };
+            if (!best || isBetter(cand, best)) best = cand;
+        }
+
+        memo.set(key, best);
+        return best;
+    }
+
+    return search(0, blockers, n1, n2, life);
+}
+
+function evalUserAttempt(sc, da, order) {
+    const oL = sc.oppLeader, B = sc.blockers, life = sc.life;
+    const names = ['Leader'];
+    const icons = ['👑'];
+    const powers = [sc.myLeader];
+    for (let i = 0; i < sc.myChars.length; i++) {
+        names.push('角色' + (i + 1));
+        icons.push('⚔️');
+        powers.push(sc.myChars[i]);
+    }
+
+    const atksOrdered = [];
+    for (let pos = 0; pos < order.length; pos++) {
+        const i = order[pos];
+        const fp = powers[i] + da[i];
+        if (fp >= oL) {
+            atksOrdered.push({
+                name: names[i],
+                icon: icons[i],
+                power: powers[i],
+                don: da[i],
+                finalPower: fp,
+                excess: fp - oL
+            });
+        }
+    }
+
+    if (atksOrdered.length === 0) return { isLethal: false, elig: [], plan: [] };
+
+    const n1 = sc.hand.filter(c => c === 1).length, n2 = sc.hand.filter(c => c === 2).length;
+    const def = solveOrderedDefense(atksOrdered, B, life, oL, n1, n2);
+    const ok = !def.survived;
+    return { isLethal: ok, elig: atksOrdered, plan: def.steps };
+}
+
+function simAllocDon(idx, delta) {
+    if (simState.revealed) return;
+    const sc = simState.scenario, da = simState.donAlloc;
+    const nv = da[idx] + delta;
+    if (nv < 0) return;
+    const totalUsed = da.reduce((s,v,i) => s + (i===idx ? nv : v), 0);
+    if (totalUsed > sc.donCards) return;
+    da[idx] = nv;
+    renderSimAlloc();
+}
+
+function simMoveOrder(pos, delta) {
+    if (simState.revealed) return;
+    const targetPos = pos + delta;
+    if (targetPos < 0 || targetPos >= simState.order.length) return;
+    const temp = simState.order[pos];
+    simState.order[pos] = simState.order[targetPos];
+    simState.order[targetPos] = temp;
+    renderSimAlloc();
+}
+
+function simSubmitLethal() {
+    if (simState.revealed) return;
+    simState.revealed = true;
+    const sc = simState.scenario;
+    const userResult = evalUserAttempt(sc, simState.donAlloc, simState.order);
+    const isCorrect = userResult.isLethal;
+    simState.score.total++;
+    if (isCorrect) simState.score.correct++;
+    renderSimResult({
+        userAction: 'lethal',
+        userResult,
+        isCorrect,
+        optResult: sc.optResult
+    });
+}
+
+function simSubmitPass() {
+    if (simState.revealed) return;
+    simState.revealed = true;
+    const sc = simState.scenario;
+    const isCorrect = !sc.isLethal;
+    simState.score.total++;
+    if (isCorrect) simState.score.correct++;
+    renderSimResult({
+        userAction: 'pass',
+        userResult: null,
+        isCorrect,
+        optResult: sc.optResult
+    });
+}
+
+// ─── Simulator Rendering ─────────────────────────────
+function renderSim() {
+    renderSimScore();
+    renderSimBoard();
+    renderSimAlloc();
+    renderSimActions(false);
+    document.getElementById('sim-result-area').innerHTML = '';
+}
+
+function renderSimScore() {
+    const s = simState.score;
+    const isAdv = simState.difficulty === 'advanced';
+    document.getElementById('sim-score').innerHTML = `
+        <div class="sim-difficulty">
+            <button class="diff-btn ${isAdv ? 'active' : ''}" onclick="setDifficulty('advanced')">⭐ 進階模式</button>
+            <button class="diff-btn ${!isAdv ? 'active' : ''}" onclick="setDifficulty('expert')">🔥 高手模式</button>
+        </div>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:8px">
+            ${isAdv ? '精簡攻頻・DON 精準分配・陷阱分配檢驗' : '差之毫釐失之千里・極限容錯＆假斬殺陷阱'}
+        </div>
+        <div>得分：<span class="score-num">${s.correct}</span> / <span class="score-num">${s.total}</span></div>
+    `;
+}
+
+function renderSimBoard() {
+    const sc = simState.scenario;
+    let h = '<div class="sim-board">';
+    // My field
+    h += '<div class="panel my-field"><div class="panel-title"><span>🏴‍☠️</span> 我方場面</div>';
+    h += `<div class="sim-info-row leader-row"><span class="info-icon">👑</span><span class="info-label">Leader</span><span class="info-value">${sc.myLeader}K</span></div>`;
+    for (let i = 0; i < sc.myChars.length; i++)
+        h += `<div class="sim-info-row"><span class="info-icon">⚔️</span><span class="info-label">角色 ${i+1}</span><span class="info-value">${sc.myChars[i]}K</span></div>`;
+    h += `<div class="sim-info-row" style="margin-top:8px;border-color:var(--don-color)"><span class="info-icon">🔴</span><span class="info-label">DON!! 卡</span><span class="info-value" style="color:var(--don-color)">${sc.donCards} 張</span></div>`;
+    h += '</div>';
+    // Opp field
+    h += '<div class="panel opp-field"><div class="panel-title"><span>⚓</span> 對方場面</div>';
+    h += `<div class="sim-info-row leader-row"><span class="info-icon">👑</span><span class="info-label">Leader</span><span class="info-value">${sc.oppLeader}K</span></div>`;
+    for (let i = 0; i < sc.blockers; i++)
+        h += `<div class="sim-info-row" style="border-color:var(--blocker-color)"><span class="info-icon">🛡️</span><span class="info-label">Blocker ${i+1}</span><span class="info-value" style="color:var(--accent-blue)">ON</span></div>`;
+    h += `<div class="sim-info-row" style="margin-top:8px"><span class="info-icon">❤️</span><span class="info-label">生命卡</span><span class="info-value" style="color:var(--accent-red)">${sc.life} 張</span></div>`;
+    h += `<div class="sim-info-row"><span class="info-icon">🃏</span><span class="info-label">手牌（側防未知）</span><span class="info-value" style="color:var(--accent-purple)">${sc.handSize} 張</span></div>`;
+    h += '</div></div>';
+    document.getElementById('sim-board-area').innerHTML = h;
+}
+
+function renderSimAlloc() {
+    const sc = simState.scenario, da = simState.donAlloc;
+    const totalUsed = da.reduce((s,v) => s+v, 0);
+    const remain = sc.donCards - totalUsed;
+    const names = ['👑 Leader'];
+    const powers = [sc.myLeader];
+    for (let i = 0; i < sc.myChars.length; i++) { names.push('⚔️ 角色'+(i+1)); powers.push(sc.myChars[i]); }
+
+    let h = '<div class="sim-alloc-section">';
+    h += '<div class="sim-alloc-title"><span>🔴 DON 分配 & 攻擊順序</span></div>';
+    h += '<div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:10px">可使用 ▲▼ 調整出手順序，＋/－ 分配 DON!!</div>';
+
+    for (let pos = 0; pos < simState.order.length; pos++) {
+        const i = simState.order[pos];
+        const fp = powers[i] + da[i];
+        const meets = fp >= sc.oppLeader;
+        h += `<div class="alloc-row ${meets ? 'meets' : 'below'}">`;
+        h += `<span class="alloc-order-num">${pos + 1}</span>`;
+        h += `<div class="order-controls">`;
+        h += `<button class="order-btn"${pos===0||simState.revealed?' disabled':''} onclick="simMoveOrder(${pos},-1)" title="前移順序">▲</button>`;
+        h += `<button class="order-btn"${pos===simState.order.length-1||simState.revealed?' disabled':''} onclick="simMoveOrder(${pos},1)" title="後移順序">▼</button>`;
+        h += `</div>`;
+        h += `<div class="alloc-name"><span class="aname">${names[i]}</span> <span class="abp">(${powers[i]}K)</span></div>`;
+        h += '<div class="alloc-controls">';
+        h += `<button class="alloc-btn"${da[i]<=0||simState.revealed?' disabled':''} onclick="simAllocDon(${i},-1)">−</button>`;
+        h += `<span class="alloc-don-ct">${da[i]}</span>`;
+        h += `<button class="alloc-btn"${remain<=0||simState.revealed?' disabled':''} onclick="simAllocDon(${i},1)">+</button>`;
+        h += '</div>';
+        h += `<span class="alloc-arrow">→</span>`;
+        h += `<span class="alloc-final ${meets?'ok':'no'}">${fp}K ${meets?'✅':'❌'}</span>`;
+        h += '</div>';
+    }
+
+    const effCount = names.reduce((c,_,i) => c + ((powers[i]+da[i])>=sc.oppLeader?1:0), 0);
+    const needed = sc.life + 1 + sc.blockers;
+    h += '<div class="don-rem-bar">';
+    h += `<span>剩餘 DON：<span class="rem-num">${remain}</span> / ${sc.donCards}</span>`;
+    h += `<span style="font-size:0.8rem;color:var(--text-muted)">有效攻擊：${effCount} 個（需要 ${needed}）</span>`;
+    h += '</div></div>';
+    document.getElementById('sim-alloc-area').innerHTML = h;
+}
+
+function renderSimActions(afterReveal) {
+    let h = '';
+    if (!afterReveal) {
+        h += '<button class="sim-btn lethal-btn" onclick="simSubmitLethal()">🎯 斬殺！</button>';
+        h += '<button class="sim-btn pass-btn" onclick="simSubmitPass()">❌ 無法實行</button>';
+        h += '<button class="sim-btn new-btn" onclick="generateNewScenario()">🔄 換題</button>';
+    } else {
+        h += '<button class="sim-btn new-btn" onclick="generateNewScenario()" style="padding:14px 36px;font-size:1.1rem">🔄 下一題</button>';
+    }
+    document.getElementById('sim-actions').innerHTML = h;
+}
+
+function renderSimResult(r) {
+    renderSimScore();
+    renderSimAlloc(); // re-render with disabled buttons
+    renderSimActions(true);
+    const sc = simState.scenario;
+    let h = `<div class="sim-result ${r.isCorrect ? 'correct' : 'wrong'}">`;
+    h += '<div class="sim-result-header">';
+    if (r.isCorrect) {
+        h += '<div class="sim-result-icon">🎉</div>';
+        if (r.userAction === 'lethal') {
+            h += '<div class="sim-result-title" style="color:var(--accent-green)">✅ 正確！成功斬殺！</div>';
+            h += '<div class="sim-result-subtitle">你的 DON 分配與攻擊順序成功突破了對方的防禦</div>';
+        } else {
+            h += '<div class="sim-result-title" style="color:var(--accent-green)">✅ 正確！這個場面確實無法斬殺</div>';
+            h += '<div class="sim-result-subtitle">即使最佳分配也無法突破對方防線，選擇 Pass 是正確判斷</div>';
+        }
+    } else {
+        h += '<div class="sim-result-icon">😢</div>';
+        if (r.userAction === 'lethal') {
+            h += '<div class="sim-result-title" style="color:var(--accent-red)">❌ 斬殺失敗！</div>';
+            if (sc.isLethal) {
+                h += '<div class="sim-result-subtitle">你的 DON 分配或攻擊順序未能突破防禦，但<strong style="color:var(--accent-green)">其實存在成功的斬殺路線</strong>！請參考下方正確攻擊計劃</div>';
+            } else {
+                h += '<div class="sim-result-subtitle">這個場面其實<strong>無法斬殺</strong>，即使最佳分配也不行。選擇「無法實行」是更好的判斷</div>';
+            }
+        } else {
+            h += '<div class="sim-result-title" style="color:var(--accent-red)">❌ 其實可以斬殺！</div>';
+            h += '<div class="sim-result-subtitle">這個場面存在成功的斬殺路線！請參考下方<strong style="color:var(--accent-green)">正確攻擊計劃</strong></div>';
+        }
+    }
+    h += '</div>';
+    // Hand reveal
+    h += '<div class="hand-reveal">';
+    h += '<div class="hand-reveal-title">🃏 對方手牌揭曉</div>';
+    h += '<div class="hand-reveal-cards">';
+    for (const c of sc.hand) {
+        const cls = c === 0 ? '' : ' val-' + c;
+        const txt = c === 0 ? '無' : c + 'K';
+        h += `<div class="hand-card${cls}" style="cursor:default;width:40px;height:54px;display:flex;align-items:center;justify-content:center;border-radius:7px;font-size:0.78rem;font-weight:700">${txt}</div>`;
+    }
+    const n1h = sc.hand.filter(c=>c===1).length, n2h = sc.hand.filter(c=>c===2).length;
+    const n0h = sc.hand.filter(c=>c===0).length;
+    h += '</div>';
+    h += `<div style="font-size:0.8rem;color:var(--text-muted);margin-top:6px">側防卡：${n1h+n2h} 張`;
+    if (n1h+n2h > 0) {
+        const pp = []; if (n1h) pp.push(n1h+'×1K'); if (n2h) pp.push(n2h+'×2K');
+        h += ` (${pp.join(' + ')} = ${n1h+n2h*2}K)`;
+    }
+    h += `，無側防：${n0h} 張</div></div>`;
+    // Show plan
+    const showPlan = r.userAction === 'lethal' && r.isCorrect ? r.userResult : sc.optResult;
+    if (showPlan && showPlan.plan && showPlan.plan.length > 0) {
+        const planLabel = (r.userAction === 'lethal' && r.isCorrect) ? '你的攻擊計劃' : (sc.isLethal ? '✅ 正確攻擊計劃' : '最佳嘗試（仍無法斬殺）');
+        h += '<div class="sim-plan">';
+        h += `<div class="sim-plan-title">⚔️ ${planLabel}</div>`;
+        showPlan.plan.forEach((s, i) => {
+            const donText = s.don > 0 ? `${s.power}K <span style="color:var(--don-color);font-weight:600">+${s.don} DON!!</span> = ${s.finalPower}K` : `${s.finalPower}K`;
+            h += `<div class="attack-step ${s.stepType}">`;
+            h += `<div class="step-number">${i+1}</div>`;
+            h += `<div class="step-attacker"><div class="name">${s.icon} ${s.name}</div>`;
+            h += `<div class="power-detail">${donText} → 攻擊對方 Leader (${sc.oppLeader}K)</div></div>`;
+            h += `<div class="step-result">${s.resultText}</div></div>`;
+        });
+        // Show DON allocation for the optimal plan if user failed and there was a way
+        if (!r.isCorrect && sc.isLethal && showPlan.elig) {
+            h += '<div style="margin-top:12px;padding:10px 14px;background:var(--bg-card);border-radius:10px;border:1px solid var(--border-color);font-size:0.85rem;color:var(--text-secondary)">';
+            h += '<strong style="color:var(--accent-gold)">💡 最佳 DON 分配：</strong> ';
+            h += showPlan.elig.map(e => `${e.icon}${e.name}: ${e.power}K${e.don > 0 ? ' +' + e.don + 'DON → ' + e.finalPower + 'K' : ''}`).join('、');
+            h += '</div>';
+        }
+        h += '</div>';
+    }
+    h += '</div>';
+    document.getElementById('sim-result-area').innerHTML = h;
 }
 
 // ─── Start ────────────────────────────────────────────
